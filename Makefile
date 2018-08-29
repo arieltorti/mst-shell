@@ -5,7 +5,7 @@ CFLAGS= -g -Wextra -Wpedantic -I$(IDIR) -ltermcap
 
 ODIR=obj
 
-_DEPS = mts.h
+_DEPS = mts.h mts_handlers.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = mts_builtins.o main.o termio.o tty.o signals.o handlers.o \

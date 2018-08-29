@@ -48,12 +48,10 @@ void mts_print_prompt() {
   mts_printf("%s> ", getenv("USER"));
 }
 
-void mts_clear_screen(int prompt) {
+void mts_clear_screen() {
   char *str;
 
   str = tgetstr("cl", NULL);
   tputs(str, 1, mts_output_char);
-
-  if (prompt == 1)
-    mts_print_prompt();
 }
+

@@ -31,13 +31,41 @@ char **mts_split_line(char *line) {
   return tokens;
 }
 
+// As we are reallocating more memory each time line.str
+// is 1024 it isnt possible for memmove to overflow.
+void mts_add_character(char* str, char c,
+                       unsigned int pos, unsigned int len) {
+  memmove(str+pos+1, str+pos, len - pos);
+  str[pos] = c;
+}
+void mts_remove_character(struct iline* line) {
+  if (line->len == 0)
+    return;
+
+  mts_tputstr("dc", 1);
+
+  char* st = line->str + line->curpos;
+  memmove(st, st+1, line->len - line->curpos + 1);
+  line->len--;
+  line->str[line->len] = '\0';
+}
+
 // Processes key inputs and execute any action associated with it.
 // Returns 0 if key is binded to an action
 // Returns 1 otherwise
-int mts_process_char(char c, char* line, unsigned int len) {
+int process_char(char c, struct iline* line) {
   switch(c){
     case 12:
-      return mts_ctrl_l_action(line, len);
+      return mts_ctrl_l_action(line->str, line->len);
+    case '\033':
+      // Arrow keys
+      getchar(); // Ignore [
+      return mts_handle_arrow_keys(getchar(), line);
+    case 127:
+      mts_cursor_right(&line->curpos);
+    case 126:
+      mts_remove_character(line);
+      return 0;
   }
 
   return 1;
@@ -46,28 +74,42 @@ int mts_process_char(char c, char* line, unsigned int len) {
 char *mts_read_command(void) {
   #define BUFSIZE 1024
   unsigned int bufsize = BUFSIZE;
-  unsigned int len = 0;
-  char* line = malloc(sizeof(char) * bufsize);
+  struct iline line;
   int c;
+
+  line.str = malloc(sizeof(char) * bufsize);
+  line.len = 0;
+  line.curpos = 0;
 
   for(;;) {
     c = getchar();
 
     if ( c == EOF || c == '\n') {
-      line[len] = '\0';
-      return line;
+      line.str[line.len] = '\0';
+      return line.str;
     }
-    
-    if (mts_process_char(c, line, len) == 1) {
-        line[len++] = c;
+
+    if (process_char(c, &line) == 1) {
+      if (line.curpos != line.len) {
+        mts_add_character(line.str, c, line.curpos, line.len);
+
+        mts_tputstr("im", 1);
         mts_printf("%c", c);
+        mts_tputstr("ei", 1);
+      } else {
+        line.str[line.len] = c;
+        mts_printf("%c", c);
+      }
+
+      line.len++;
+      line.curpos++;
     }
 
-    if (len >= bufsize){
+    if (line.len >= bufsize){
       bufsize += BUFSIZE;
-      line = realloc(line, sizeof(char) * bufsize);
+      line.str = realloc(line.str, sizeof(char) * bufsize);
 
-      if (!line)
+      if (!line.str)
         mts_fatal("Allocation error\n");
     }
   }

@@ -18,10 +18,17 @@ extern int (*builtin_func[]) (char **);
 
 unsigned int mts_num_builtins();
 
+struct iline {
+  char* str;
+  unsigned int len;
+  unsigned int curpos;
+};
+
 /* utils */
 
 void mts_fatal(const char* msg, ...);
 void mts_error(const char* msg, ...);
+void mts_tputstr(const char* str, unsigned int affcnt);
 
 /* end utils */
 
@@ -46,12 +53,13 @@ void mts_setup_signals(void);
 /* key actions */
 
 int mts_ctrl_l_action(char* line, unsigned int len);
+int mts_handle_arrow_keys(char key, struct iline* line);
+void mts_cursor_right(unsigned int* pos);
 
 /* end key actions */
 
 /* userio */
 
-int mts_process_char(char c, char* line, unsigned int len);
 char *mts_read_command(void);
 char **mts_split_line(char *line);
 

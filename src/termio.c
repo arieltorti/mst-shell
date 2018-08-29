@@ -56,3 +56,7 @@ void mts_clear_screen() {
 
   mts_print_prompt();
 }
+
+void mts_tputstr(const char* str, unsigned int affcnt) {
+  tputs(tgetstr(str, NULL), affcnt, mts_output_char);
+}

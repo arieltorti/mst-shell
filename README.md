@@ -30,7 +30,8 @@ $ make && ./mst
   - [ ] Startup scripts
   - [ ] Run in background with `&`
   - [ ] Conditional execution with `&&` and `||`
-  - [ ] Ability to delete
+  - [X] Ability to delete
+  - [X] Ability to move and edit 
   - [ ] Aliases
   - [ ] Startup configuration files
   - [ ] Command parser, i.e treat echo "mts" as two arguments.
